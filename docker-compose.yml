@@ -1,0 +1,63 @@
+services:
+  # Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: deepfake-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - backend-uploads:/app/uploads
+      - backend-db:/app
+      - huggingface-cache:/root/.cache/huggingface
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=True
+      - SECRET_KEY=fadf226c2ba61a2af190443d1fadaa15
+      - JWT_SECRET_KEY=8df6b14c5eb4afdf7dd0508840e6ef45
+      - DATABASE_URI=sqlite:///deepfake_detection.db
+      - HOST=0.0.0.0
+      - PORT=5000
+      - FRONTEND_URL=http://localhost:5173
+    networks:
+      - deepfake-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: deepfake-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    networks:
+      - deepfake-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  deepfake-network:
+    driver: bridge
+
+volumes:
+  backend-uploads:
+    driver: local
+  backend-db:
+    driver: local
+  huggingface-cache:
+    driver: local
