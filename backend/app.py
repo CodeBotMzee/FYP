@@ -67,14 +67,15 @@ def init_database():
 
 # History & Stats Routes
 @app.route('/api/history', methods=['GET'])
-@jwt_required()
+# @jwt_required()  # Temporarily disabled for testing
 def get_history():
     """
     Get all detection history for the current user.
     Returns: {success, history: []}
     """
     try:
-        user_id = get_jwt_identity()
+        # user_id = get_jwt_identity()  # Temporarily disabled
+        user_id = 1  # Hardcoded for testing
         print(f"[HISTORY] Fetching history for user ID: {user_id}")
         
         # Get all detection history ordered by most recent
@@ -100,14 +101,15 @@ def get_history():
         }), 500
 
 @app.route('/api/stats', methods=['GET'])
-@jwt_required()
+# @jwt_required()  # Temporarily disabled for testing
 def get_stats():
     """
     Get detection statistics for the current user.
     Returns: {success, total_detections, fake_count, real_count, accuracy}
     """
     try:
-        user_id = get_jwt_identity()
+        # user_id = get_jwt_identity()  # Temporarily disabled
+        user_id = 1  # Hardcoded for testing
         print(f"[STATS] Fetching stats for user ID: {user_id}")
         
         # Get all detections

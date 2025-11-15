@@ -56,3 +56,16 @@ export const isAuthenticated = () => {
 export const logout = () => {
   removeToken();
 };
+
+/**
+ * Auth object with all authentication methods
+ */
+export const auth = {
+  setToken: saveToken,
+  getToken,
+  removeToken,
+  setUser: saveUser,
+  getUser: getCurrentUser,
+  isAuthenticated,
+  logout,
+};

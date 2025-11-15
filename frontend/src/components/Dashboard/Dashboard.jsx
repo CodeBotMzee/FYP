@@ -8,7 +8,8 @@ import { auth } from '../../utils/auth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const user = auth.getUser();
+  // const user = auth.getUser();  // Temporarily disabled
+  const user = { username: 'Guest' };  // Temporary placeholder
   const [stats, setStats] = useState({
     total_detections: 0,
     fake_count: 0,

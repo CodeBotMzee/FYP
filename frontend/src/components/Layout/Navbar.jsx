@@ -1,20 +1,23 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Moon, Sun } from 'lucide-react';
-import { logout, getCurrentUser } from '../../utils/auth';
+// import { useNavigate } from 'react-router-dom';
+// import { LogOut, User, Moon, Sun } from 'lucide-react';
+import { User, Moon, Sun } from 'lucide-react';
+// import { logout, getCurrentUser } from '../../utils/auth';
 
 /**
  * Navbar Component
  * Top navigation bar with user info and logout
+ * AUTHENTICATION TEMPORARILY DISABLED
  */
 const Navbar = ({ darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate();
-  const user = getCurrentUser();
+  // const navigate = useNavigate();
+  // const user = getCurrentUser();
+  const user = { username: 'Guest' };  // Temporary placeholder
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+  // const handleLogout = () => {
+  //   logout();
+  //   navigate('/login');
+  // };
 
   return (
     <nav className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700">
@@ -46,14 +49,14 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
               </div>
             )}
 
-            {/* Logout button */}
-            <button
+            {/* Logout button - Temporarily hidden */}
+            {/* <button
               onClick={handleLogout}
               className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               <LogOut size={18} />
               <span className="hidden sm:inline">Logout</span>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

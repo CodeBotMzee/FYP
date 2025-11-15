@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { authAPI } from '../../services/api';
-import { auth } from '../../utils/auth';
+import { auth } from '../../utils/auth.js';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,16 +28,28 @@ const Login = () => {
 
     try {
       const response = await authAPI.login(formData.username, formData.password);
+      console.log('Login response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', Object.keys(response));
+      console.log('Access token:', response.access_token);
+      console.log('Access token type:', typeof response.access_token);
+      console.log('Access token length:', response.access_token?.length);
       
       if (response.success) {
         // Store token and user data
         auth.setToken(response.access_token);
         auth.setUser(response.user);
         
+        // Verify token was stored
+        const storedToken = auth.getToken();
+        console.log('Token stored, length:', storedToken?.length);
+        console.log('First 50 chars:', storedToken?.substring(0, 50));
+        
         // Redirect to dashboard
         navigate('/dashboard');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);

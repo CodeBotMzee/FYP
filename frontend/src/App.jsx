@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { isAuthenticated } from './utils/auth';
+// import { isAuthenticated } from './utils/auth';  // Temporarily disabled
 
-// Auth Components
-import Login from './components/Auth/Login';
-import Signup from './components/Auth/Signup';
+// Auth Components - Temporarily hidden
+// import Login from './components/Auth/Login';
+// import Signup from './components/Auth/Signup';
 
 // Layout Components
 import MainLayout from './components/Layout/MainLayout';
@@ -21,66 +21,18 @@ import CameraDetection from './components/Camera/CameraDetection';
 // History Component
 import HistoryList from './components/History/HistoryList';
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
-
-// Public Route Component (redirect if already logged in)
-const PublicRoute = ({ children }) => {
-  if (isAuthenticated()) {
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  return children;
-};
+// AUTHENTICATION TEMPORARILY DISABLED FOR TESTING
+// All routes are now accessible without login
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Root - Redirect based on auth status */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated() ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+        {/* Root - Redirect to dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Public Routes */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <PublicRoute>
-              <Signup />
-            </PublicRoute>
-          }
-        />
-
-        {/* Protected Routes with Layout */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
+        {/* All Routes with Layout - No authentication required */}
+        <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/camera" element={<CameraDetection />} />
           <Route path="/upload/image" element={<ImageUpload />} />
@@ -89,7 +41,7 @@ function App() {
         </Route>
 
         {/* 404 - Catch all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>
   );

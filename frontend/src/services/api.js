@@ -14,12 +14,13 @@ const api = axios.create({
 });
 
 // Request interceptor - Add JWT token to headers
+// TEMPORARILY DISABLED - No authentication required
 api.interceptors.request.use(
   (config) => {
-    const token = auth.getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    // const token = auth.getToken();
+    // if (token) {
+    //   config.headers.Authorization = `Bearer ${token}`;
+    // }
     return config;
   },
   (error) => {
