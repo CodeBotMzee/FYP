@@ -184,6 +184,24 @@ Response: 200
 
 ### Detection
 
+#### Get Available Models
+```http
+GET /api/detect/models
+
+Response: 200
+{
+  "success": true,
+  "models": [
+    {
+      "key": "dima806",
+      "name": "Dima806 Deepfake Detector",
+      "description": "General purpose detection"
+    },
+    ...
+  ]
+}
+```
+
 #### Detect Image
 ```http
 POST /api/detect/image
@@ -192,13 +210,15 @@ Content-Type: multipart/form-data
 
 Form Data:
 - image: <file>
+- model: "dima806" (optional, default: "dima806")
 
 Response: 200
 {
   "success": true,
   "is_fake": false,
   "confidence": 87.45,
-  "image_id": 1
+  "image_id": 1,
+  "model_used": "Dima806 Deepfake Detector"
 }
 ```
 
@@ -210,13 +230,15 @@ Content-Type: multipart/form-data
 
 Form Data:
 - video: <file>
+- model: "deep-fake-v2" (optional, default: "dima806")
 
 Response: 200
 {
   "success": true,
   "is_fake": true,
   "confidence": 92.31,
-  "video_id": 1
+  "video_id": 1,
+  "model_used": "Deep Fake Detector v2"
 }
 ```
 
@@ -227,14 +249,16 @@ Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "image": "data:image/jpeg;base64,/9j/4AAQ..."
+  "image": "data:image/jpeg;base64,/9j/4AAQ...",
+  "model": "deep-fake-v2" (optional, default: "deep-fake-v2")
 }
 
 Response: 200
 {
   "success": true,
   "is_fake": false,
-  "confidence": 81.67
+  "confidence": 81.67,
+  "model_used": "Deep Fake Detector v2"
 }
 ```
 
@@ -268,14 +292,27 @@ Response: 200
 }
 ```
 
-## 🤖 ML Model
+## 🤖 ML Models
 
-### Model Details
-- **Name:** dima806/deepfake_vs_real_image_detection
-- **Source:** HuggingFace Transformers
-- **Type:** Binary Image Classification
-- **Size:** ~400MB
-- **Framework:** PyTorch
+### Available Models
+
+**1. Dima806 Deepfake Detector (Default)**
+- Model: `dima806/deepfake_vs_real_image_detection`
+- Type: AutoModelForImageClassification
+- Size: ~400MB
+- Best for: General purpose detection
+
+**2. Deep Fake Detector v2**
+- Model: `prithivMLmods/Deep-Fake-Detector-v2-Model`
+- Type: ViTForImageClassification
+- Size: ~350MB
+- Best for: Advanced detection with Vision Transformer
+
+**3. Open Deepfake Detection**
+- Model: `prithivMLmods/open-deepfake-detection`
+- Type: SiglipForImageClassification
+- Size: ~450MB
+- Best for: SigLIP-based detection
 
 ### How It Works
 
@@ -297,18 +334,21 @@ Response: 200
 - CPU: 2-4 seconds per image
 
 ### Model Caching
-Model loads once on startup and stays in memory for fast inference.
+Each model loads once and stays in memory for fast inference.
 
 ```python
 # In ml_model.py
-_detector_instance = None  # Singleton pattern
+_detector_cache = {}  # Cache per model
 
-def get_detector():
-    global _detector_instance
-    if _detector_instance is None:
-        _detector_instance = DeepfakeDetector()
-    return _detector_instance
+def get_detector(model_key='dima806'):
+    if model_key not in _detector_cache:
+        _detector_cache[model_key] = DeepfakeDetector(model_key)
+    return _detector_cache[model_key]
 ```
+
+### Features
+- **Face Detection & Enhancement** - Extracts and enhances faces for better accuracy
+- **Frame Stabilization** - Buffers camera frames to reduce false positives
 
 ## 🔐 Security
 

@@ -1,6 +1,7 @@
 """
 Detection routes and utilities.
 Handles image, video, and camera detection endpoints.
+FIXED VERSION with proper camera enhancement and model support
 """
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -10,13 +11,13 @@ from datetime import datetime
 import os
 import uuid
 import base64
-from ml_model import detect_deepfake, get_detector
+from ml_model import detect_deepfake, get_detector, get_available_models
 
 detection_bp = Blueprint('detection', __name__)
 
 # File upload configuration
 ALLOWED_IMAGE_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi'}
+ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'avi', 'mov'}
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 MAX_VIDEO_SIZE = 100 * 1024 * 1024  # 100MB
 
@@ -33,17 +34,35 @@ def generate_unique_filename(original_filename):
     ext = get_file_extension(original_filename)
     return f"{uuid.uuid4().hex}.{ext}"
 
-# The detect_deepfake function is now imported from ml_model.py
-# It uses the HuggingFace model: dima806/deepfake_vs_real_image_detection
+
+@detection_bp.route('/models', methods=['GET'])
+def get_models():
+    """
+    Get list of available detection models.
+    Returns: {success, models: []}
+    """
+    try:
+        models = get_available_models()
+        return jsonify({
+            'success': True,
+            'models': list(models.values())
+        }), 200
+    except Exception as e:
+        print(f"[MODELS ERROR] Failed to fetch models: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': 'Failed to fetch models'
+        }), 500
+
 
 @detection_bp.route('/image', methods=['POST'])
 @jwt_required()
 def detect_image():
     """
     Upload and detect deepfake in image.
-    Expects: multipart/form-data with 'image' field
+    Expects: multipart/form-data with 'image' field and optional 'model' field
     Requires: JWT token in Authorization header
-    Returns: {success, is_fake, confidence, image_id}
+    Returns: {success, is_fake, confidence, image_id, model_used}
     """
     try:
         user_id = int(get_jwt_identity())
@@ -53,7 +72,10 @@ def detect_image():
                 'message': 'Authentication required'
             }), 401
         
-        print(f"[DETECTION] Image upload request from user ID: {user_id}")
+        # Get model selection (default to dima806)
+        model_key = request.form.get('model', 'dima806')
+        
+        print(f"[DETECTION] Image upload request from user ID: {user_id}, model: {model_key}")
         
         # Check if file is present
         if 'image' not in request.files:
@@ -111,9 +133,14 @@ def detect_image():
         db.session.add(image)
         db.session.commit()
         
-        # Run detection using ML model
+        # Run detection using ML model with face enhancement
         try:
-            is_fake, confidence, model_name = detect_deepfake(file_path, file_type='image')
+            is_fake, confidence, model_name = detect_deepfake(
+                file_path, 
+                file_type='image', 
+                model_key=model_key,
+                enhance_face=True  # Enable face extraction and enhancement
+            )
         except Exception as e:
             print(f"[DETECTION ERROR] ML model failed: {str(e)}")
             image.processing_status = 'failed'
@@ -142,13 +169,14 @@ def detect_image():
         db.session.add(history)
         db.session.commit()
         
-        print(f"[DETECTION] Image detection completed: ID {image.id}")
+        print(f"[DETECTION] Image detection completed: ID {image.id}, Result: {'FAKE' if is_fake else 'REAL'} ({confidence:.2f}%)")
         
         return jsonify({
             'success': True,
             'is_fake': is_fake,
             'confidence': round(confidence, 2),
             'image_id': image.id,
+            'model_used': model_name,
             'message': 'Image processed successfully'
         }), 200
         
@@ -160,14 +188,15 @@ def detect_image():
             'message': 'Image detection failed'
         }), 500
 
+
 @detection_bp.route('/video', methods=['POST'])
 @jwt_required()
 def detect_video():
     """
     Upload and detect deepfake in video.
-    Expects: multipart/form-data with 'video' field
+    Expects: multipart/form-data with 'video' field and optional 'model' field
     Requires: JWT token in Authorization header
-    Returns: {success, is_fake, confidence, video_id}
+    Returns: {success, is_fake, confidence, video_id, model_used, details}
     """
     try:
         user_id = int(get_jwt_identity())
@@ -177,7 +206,10 @@ def detect_video():
                 'message': 'Authentication required'
             }), 401
         
-        print(f"[DETECTION] Video upload request from user ID: {user_id}")
+        # Get model selection (default to dima806)
+        model_key = request.form.get('model', 'dima806')
+        
+        print(f"[DETECTION] Video upload request from user ID: {user_id}, model: {model_key}")
         
         # Check if file is present
         if 'video' not in request.files:
@@ -230,7 +262,7 @@ def detect_video():
             filename=original_filename,
             file_path=file_path,
             file_size=file_size,
-            duration=None,  # TODO: Extract actual duration using ffmpeg
+            duration=None,
             processing_status='processing'
         )
         db.session.add(video)
@@ -238,7 +270,9 @@ def detect_video():
         
         # Run detection using ML model (extracts and analyzes frames)
         try:
-            is_fake, confidence, model_name = detect_deepfake(file_path, file_type='video')
+            # Get detector instance for video processing
+            detector = get_detector(model_key)
+            is_fake, confidence, model_name, details = detector.detect_video(file_path, fps=1)
         except Exception as e:
             print(f"[DETECTION ERROR] ML model failed: {str(e)}")
             video.processing_status = 'failed'
@@ -254,7 +288,6 @@ def detect_video():
         video.model_used = model_name
         video.processing_status = 'completed'
         video.processed_at = datetime.utcnow()
-        # TODO: Generate and save thumbnail
         
         # Add to detection history
         history = DetectionHistory(
@@ -268,13 +301,20 @@ def detect_video():
         db.session.add(history)
         db.session.commit()
         
-        print(f"[DETECTION] Video detection completed: ID {video.id}")
+        print(f"[DETECTION] Video detection completed: ID {video.id}, Result: {'FAKE' if is_fake else 'REAL'} ({confidence:.2f}%)")
+        print(f"[DETECTION] Video details: {details['processed_frames']} frames, {details['fake_frames']} fake, {details['real_frames']} real")
         
         return jsonify({
             'success': True,
             'is_fake': is_fake,
             'confidence': round(confidence, 2),
             'video_id': video.id,
+            'model_used': model_name,
+            'details': {
+                'processed_frames': details['processed_frames'],
+                'fake_frames': details['fake_frames'],
+                'real_frames': details['real_frames']
+            },
             'message': 'Video processed successfully'
         }), 200
         
@@ -286,14 +326,17 @@ def detect_video():
             'message': 'Video detection failed'
         }), 500
 
+
 @detection_bp.route('/camera', methods=['POST'])
 @jwt_required()
 def detect_camera():
     """
-    Detect deepfake from camera frame.
-    Expects: JSON with base64 encoded image
+    Detect deepfake from camera frame (OPTIMIZED VERSION).
+    Uses direct bytes processing with face enhancement and stabilization.
+    
+    Expects: JSON with base64 encoded image and optional 'model' field
     Requires: JWT token in Authorization header
-    Returns: {success, is_fake, confidence}
+    Returns: {success, is_fake, confidence, model_used}
     """
     try:
         user_id = int(get_jwt_identity())
@@ -303,9 +346,12 @@ def detect_camera():
                 'message': 'Authentication required'
             }), 401
         
-        print(f"[DETECTION] Camera detection request from user ID: {user_id}")
-        
         data = request.get_json()
+        
+        # Get model selection (default to deep-fake-v2 for camera - works best!)
+        model_key = data.get('model', 'deep-fake-v2') if data else 'deep-fake-v2'
+        
+        print(f"[CAMERA] Detection request from user ID: {user_id}, model: {model_key}")
         
         # Validate input
         if not data or 'image' not in data:
@@ -323,31 +369,40 @@ def detect_camera():
             
             image_bytes = base64.b64decode(image_data)
         except Exception as e:
-            print(f"[DETECTION ERROR] Failed to decode base64 image: {str(e)}")
+            print(f"[CAMERA ERROR] Failed to decode base64 image: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': 'Invalid image data'
             }), 400
         
-        # Save frame temporarily
-        frame_filename = f"{uuid.uuid4().hex}.jpg"
-        frame_path = os.path.join('uploads', 'camera', frame_filename)
-        os.makedirs(os.path.dirname(frame_path), exist_ok=True)
-        
-        with open(frame_path, 'wb') as f:
-            f.write(image_bytes)
-        
-        print(f"[DETECTION] Camera frame saved: {frame_path}")
-        
-        # Run detection using ML model
+        # Run detection directly from bytes (OPTIMIZED - no disk I/O!)
         try:
-            is_fake, confidence, model_name = detect_deepfake(frame_path, file_type='image')
+            detector = get_detector(model_key)
+            
+            # Use optimized camera detection with face enhancement and stabilization
+            is_fake, confidence, model_name = detector.detect_from_bytes(
+                image_bytes,
+                is_camera=True  # Enables face detection, enhancement, and frame buffering
+            )
+            
         except Exception as e:
-            print(f"[DETECTION ERROR] ML model failed: {str(e)}")
+            print(f"[CAMERA ERROR] ML model failed: {str(e)}")
             return jsonify({
                 'success': False,
                 'message': f'Detection failed: {str(e)}'
             }), 500
+        
+        # Optionally save frame for history (can be disabled to save space)
+        frame_filename = f"{uuid.uuid4().hex}.jpg"
+        frame_path = os.path.join('uploads', 'camera', frame_filename)
+        
+        try:
+            os.makedirs(os.path.dirname(frame_path), exist_ok=True)
+            with open(frame_path, 'wb') as f:
+                f.write(image_bytes)
+        except Exception as e:
+            print(f"[CAMERA WARNING] Failed to save frame: {str(e)}")
+            frame_path = None
         
         # Save to database
         camera_detection = CameraDetection(
@@ -370,19 +425,105 @@ def detect_camera():
         db.session.add(history)
         db.session.commit()
         
-        print(f"[DETECTION] Camera detection completed: ID {camera_detection.id}")
+        print(f"[CAMERA] Detection completed: ID {camera_detection.id}, Result: {'FAKE' if is_fake else 'REAL'} ({confidence:.2f}%)")
         
         return jsonify({
             'success': True,
             'is_fake': is_fake,
             'confidence': round(confidence, 2),
+            'model_used': model_name,
             'message': 'Frame processed successfully'
         }), 200
         
     except Exception as e:
         db.session.rollback()
-        print(f"[DETECTION ERROR] Camera detection failed: {str(e)}")
+        print(f"[CAMERA ERROR] Camera detection failed: {str(e)}")
         return jsonify({
             'success': False,
             'message': 'Camera detection failed'
+        }), 500
+
+
+@detection_bp.route('/camera/batch', methods=['POST'])
+@jwt_required()
+def detect_camera_batch():
+    """
+    Detect multiple camera frames in batch for better performance.
+    Useful for processing video clips from camera.
+    
+    Expects: JSON with array of base64 encoded images
+    Returns: {success, results: [{is_fake, confidence}], overall_result}
+    """
+    try:
+        user_id = int(get_jwt_identity())
+        data = request.get_json()
+        
+        model_key = data.get('model', 'deep-fake-v2')
+        frames = data.get('frames', [])
+        
+        if not frames:
+            return jsonify({
+                'success': False,
+                'message': 'No frames provided'
+            }), 400
+        
+        print(f"[CAMERA BATCH] Processing {len(frames)} frames for user {user_id}")
+        
+        detector = get_detector(model_key)
+        results = []
+        
+        for i, frame_data in enumerate(frames):
+            try:
+                # Decode frame
+                if ',' in frame_data:
+                    frame_data = frame_data.split(',')[1]
+                image_bytes = base64.b64decode(frame_data)
+                
+                # Detect
+                is_fake, confidence, model_name = detector.detect_from_bytes(
+                    image_bytes,
+                    is_camera=True
+                )
+                
+                results.append({
+                    'frame_index': i,
+                    'is_fake': is_fake,
+                    'confidence': round(confidence, 2)
+                })
+                
+            except Exception as e:
+                print(f"[CAMERA BATCH] Frame {i} failed: {str(e)}")
+                results.append({
+                    'frame_index': i,
+                    'error': str(e)
+                })
+        
+        # Calculate overall result
+        valid_results = [r for r in results if 'error' not in r]
+        if valid_results:
+            fake_count = sum(1 for r in valid_results if r['is_fake'])
+            overall_is_fake = fake_count > len(valid_results) / 2
+            avg_confidence = sum(r['confidence'] for r in valid_results) / len(valid_results)
+        else:
+            overall_is_fake = None
+            avg_confidence = 0
+        
+        print(f"[CAMERA BATCH] Completed: {len(valid_results)}/{len(frames)} frames, Overall: {'FAKE' if overall_is_fake else 'REAL'}")
+        
+        return jsonify({
+            'success': True,
+            'results': results,
+            'overall_result': {
+                'is_fake': overall_is_fake,
+                'confidence': round(avg_confidence, 2),
+                'fake_count': fake_count if valid_results else 0,
+                'total_frames': len(valid_results)
+            }
+        }), 200
+        
+    except Exception as e:
+        print(f"[CAMERA BATCH ERROR] {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': str(e)
         }), 500

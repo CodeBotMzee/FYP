@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, AlertTriangle, Shield, Clock } from 'lucide-react
 const ResultDisplay = ({ result, type }) => {
   if (!result) return null;
 
-  const { is_fake, confidence, message } = result;
+  const { is_fake, confidence, message, model_used } = result;
 
   return (
     <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-700 animate-slide-up">
@@ -74,6 +74,11 @@ const ResultDisplay = ({ result, type }) => {
         <div className="flex-1">
           <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">Analysis Complete</p>
           <p className="text-sm text-blue-700 dark:text-blue-400">{message}</p>
+          {model_used && (
+            <p className="text-xs text-blue-600 dark:text-blue-500 mt-2">
+              Model: {model_used}
+            </p>
+          )}
         </div>
       </div>
 

@@ -7,6 +7,7 @@ AI-powered web application for detecting deepfake images and videos using machin
 - 📸 **Image Detection** - Upload and analyze images for deepfake manipulation
 - 🎥 **Video Detection** - Analyze videos frame-by-frame
 - 📷 **Camera Detection** - Real-time webcam analysis
+- 🧠 **Multiple AI Models** - Choose from 3 different detection models
 - 📊 **Dashboard** - View statistics and detection history
 - 🌓 **Dark Mode** - Modern, professional UI with dark mode support
 
@@ -14,16 +15,18 @@ AI-powered web application for detecting deepfake images and videos using machin
 
 **Backend:** Flask, PyTorch, HuggingFace Transformers, SQLAlchemy, SQLite  
 **Frontend:** React 18, Vite, Tailwind CSS, React Router  
-**ML Model:** dima806/deepfake_vs_real_image_detection
+**ML Models:** 
+- dima806/deepfake_vs_real_image_detection (Default)
+- prithivMLmods/Deep-Fake-Detector-v2-Model
+- prithivMLmods/open-deepfake-detection
 
 ## 📁 Project Structure
 
 ```
 deepfake-detection/
-├── backend/           # Flask API + ML model
+├── backend/           # Flask API + ML models
 ├── frontend/          # React application
-├── docker-compose.yml # Docker setup
-└── *.bat             # Windows helper scripts
+└── docker-compose.yml # Docker setup
 ```
 
 ## 🚀 Quick Start
@@ -49,16 +52,7 @@ docker-compose up -d
 # Backend: http://localhost:5000
 ```
 
-**Option 2: Automated (Windows)**
-```bash
-# Install backend
-install_backend.bat
-
-# Install frontend (new terminal)
-install_frontend.bat
-```
-
-**Option 3: Manual**
+**Option 2: Manual**
 ```bash
 # Backend
 cd backend
@@ -78,10 +72,24 @@ npm run dev
 
 ## 🎯 How It Works
 
-1. **Upload** - Select an image, video, or use your camera
-2. **Analyze** - AI model processes the content using deep learning
-3. **Results** - Get instant feedback with confidence scores
-4. **History** - Track all your detections in the dashboard
+1. **Choose Model** - Select from 3 AI detection models
+2. **Upload** - Select an image, video, or use your camera
+3. **Analyze** - AI model processes the content using deep learning
+4. **Results** - Get instant feedback with confidence scores
+5. **History** - Track all your detections in the dashboard
+
+## 🧠 Model Switching
+
+Choose from 3 AI models via dropdown in the UI:
+- **Dima806** - General purpose (default)
+- **Deep Fake v2** - Advanced ViT-based detector
+- **Open Deepfake** - SigLIP-based detector
+
+Pre-download models (optional):
+```bash
+cd backend
+python download_all_models.py
+```
 
 ## 🔧 Configuration
 

@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import { Camera, Play, Square, Loader, CheckCircle, XCircle } from 'lucide-react';
 import { detectionAPI } from '../../services/api';
+import ModelSelector from '../ModelSelector';
 
 const CameraDetection = () => {
   const webcamRef = useRef(null);
@@ -10,6 +11,7 @@ const CameraDetection = () => {
   const [detectionCount, setDetectionCount] = useState(0);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
+  const [selectedModel, setSelectedModel] = useState('dima806');
   const intervalRef = useRef(null);
 
   const captureAndDetect = useCallback(async () => {
@@ -29,7 +31,7 @@ const CameraDetection = () => {
       }
 
       // Send to API
-      const response = await detectionAPI.detectCamera(imageSrc);
+      const response = await detectionAPI.detectCamera(imageSrc, selectedModel);
 
       if (response.success) {
         setCurrentResult(response);
@@ -40,7 +42,7 @@ const CameraDetection = () => {
     } finally {
       setProcessing(false);
     }
-  }, [processing]);
+  }, [processing, selectedModel]);
 
   const startDetection = () => {
     setIsDetecting(true);
@@ -70,8 +72,17 @@ const CameraDetection = () => {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Live Camera Detection</h1>
-        <p className="text-gray-600">Real-time deepfake detection from your webcam</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Live Camera Detection</h1>
+        <p className="text-gray-600 dark:text-gray-400">Real-time deepfake detection from your webcam</p>
+      </div>
+
+      {/* Model Selector */}
+      <div className="mb-6">
+        <ModelSelector 
+          selectedModel={selectedModel}
+          onModelChange={setSelectedModel}
+          disabled={isDetecting}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -142,7 +153,7 @@ const CameraDetection = () => {
               {!isDetecting ? (
                 <button
                   onClick={startDetection}
-                  className="flex-1 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center justify-center"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg"
                 >
                   <Play className="w-5 h-5 mr-2" />
                   Start Detection
@@ -150,7 +161,7 @@ const CameraDetection = () => {
               ) : (
                 <button
                   onClick={stopDetection}
-                  className="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition flex items-center justify-center"
+                  className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center shadow-md hover:shadow-lg"
                 >
                   <Square className="w-5 h-5 mr-2" />
                   Stop Detection

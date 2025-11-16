@@ -78,9 +78,15 @@ export const authAPI = {
 
 // Detection API
 export const detectionAPI = {
-  detectImage: async (imageFile) => {
+  getModels: async () => {
+    const response = await api.get('/detect/models');
+    return response.data;
+  },
+
+  detectImage: async (imageFile, modelKey = 'dima806') => {
     const formData = new FormData();
     formData.append('image', imageFile);
+    formData.append('model', modelKey);
     
     const response = await api.post('/detect/image', formData, {
       headers: {
@@ -90,9 +96,10 @@ export const detectionAPI = {
     return response.data;
   },
 
-  detectVideo: async (videoFile) => {
+  detectVideo: async (videoFile, modelKey = 'dima806') => {
     const formData = new FormData();
     formData.append('video', videoFile);
+    formData.append('model', modelKey);
     
     const response = await api.post('/detect/video', formData, {
       headers: {
@@ -102,9 +109,10 @@ export const detectionAPI = {
     return response.data;
   },
 
-  detectCamera: async (base64Image) => {
+  detectCamera: async (base64Image, modelKey = 'dima806') => {
     const response = await api.post('/detect/camera', {
       image: base64Image,
+      model: modelKey,
     });
     return response.data;
   },

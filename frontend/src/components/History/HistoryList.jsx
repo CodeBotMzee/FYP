@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Image, Video, Camera, Search, Filter } from 'lucide-react';
+import { CheckCircle, XCircle, Image, Video, Camera, Filter } from 'lucide-react';
 import { historyAPI } from '../../services/api';
 
 const HistoryList = () => {
   const [history, setHistory] = useState([]);
   const [filteredHistory, setFilteredHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [resultFilter, setResultFilter] = useState('all');
+  const [modelFilter, setModelFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -18,7 +18,7 @@ const HistoryList = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [history, searchTerm, typeFilter, resultFilter]);
+  }, [history, typeFilter, resultFilter, modelFilter]);
 
   const fetchHistory = async () => {
     try {
@@ -47,10 +47,10 @@ const HistoryList = () => {
       filtered = filtered.filter((item) => item.is_fake === isFake);
     }
 
-    // Search filter
-    if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.detection_type.toLowerCase().includes(searchTerm.toLowerCase())
+    // Model filter
+    if (modelFilter !== 'all') {
+      filtered = filtered.filter((item) => 
+        item.model_version && item.model_version.toLowerCase().includes(modelFilter.toLowerCase())
       );
     }
 
@@ -98,34 +98,17 @@ const HistoryList = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-200">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search
-            </label>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
-          </div>
-
           {/* Type Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Type
             </label>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="all">All Types</option>
               <option value="image">Image</option>
@@ -136,17 +119,34 @@ const HistoryList = () => {
 
           {/* Result Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Result
             </label>
             <select
               value={resultFilter}
               onChange={(e) => setResultFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="all">All Results</option>
               <option value="fake">Fake</option>
               <option value="real">Real</option>
+            </select>
+          </div>
+
+          {/* Model Filter */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Model
+            </label>
+            <select
+              value={modelFilter}
+              onChange={(e) => setModelFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="all">All Models</option>
+              <option value="dima806">Dima806 Deepfake Detector</option>
+              <option value="deep fake detector v2">Deep Fake Detector v2</option>
+              <option value="open deepfake">Open Deepfake Detection</option>
             </select>
           </div>
         </div>

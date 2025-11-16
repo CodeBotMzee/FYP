@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Upload, Video as VideoIcon, X, Loader, Play } from 'lucide-react';
 import { detectionAPI } from '../../services/api';
 import ResultDisplay from './ResultDisplay';
+import ModelSelector from '../ModelSelector';
 
 const VideoUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -9,6 +10,7 @@ const VideoUpload = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [selectedModel, setSelectedModel] = useState('dima806');
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -51,7 +53,7 @@ const VideoUpload = () => {
     setError('');
 
     try {
-      const response = await detectionAPI.detectVideo(selectedFile);
+      const response = await detectionAPI.detectVideo(selectedFile, selectedModel);
       
       if (response.success) {
         setResult(response);
@@ -79,6 +81,13 @@ const VideoUpload = () => {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Video Detection</h1>
         <p className="text-gray-600 dark:text-gray-400">Upload a video to analyze for deepfake manipulation using AI</p>
       </div>
+
+      {/* Model Selector */}
+      <ModelSelector 
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+        disabled={loading}
+      />
 
       {/* Upload Area */}
       {!preview ? (
@@ -120,7 +129,7 @@ const VideoUpload = () => {
             </video>
             <button
               onClick={handleReset}
-              className="absolute top-4 right-4 p-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-lg opacity-0 group-hover:opacity-100"
+              className="absolute top-4 right-4 p-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-lg opacity-90 hover:opacity-100"
             >
               <X className="w-5 h-5" />
             </button>

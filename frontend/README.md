@@ -60,11 +60,12 @@ frontend/src/
 │   │   ├── VideoUpload.jsx     # Video upload
 │   │   └── ResultDisplay.jsx   # Detection results
 │   ├── History/
-│   │   └── HistoryList.jsx     # Detection history
-│   └── Layout/
-│       ├── MainLayout.jsx      # Layout wrapper
-│       ├── Navbar.jsx          # Top navigation
-│       └── Sidebar.jsx         # Side navigation
+│   │   └── HistoryList.jsx     # Detection history (with model filter)
+│   ├── Layout/
+│   │   ├── MainLayout.jsx      # Layout wrapper
+│   │   ├── Navbar.jsx          # Top navigation
+│   │   └── Sidebar.jsx         # Side navigation
+│   └── ModelSelector.jsx       # Model selection dropdown
 ├── services/
 │   └── api.js                  # Axios API service
 ├── utils/
@@ -144,11 +145,11 @@ frontend/src/
 
 #### HistoryList.jsx
 - Filterable table
-- Search by date
 - Filter by type (image/video/camera)
 - Filter by result (fake/real)
+- Filter by model (dima806/deep-fake-v2/open-deepfake)
 - Pagination (10 per page)
-- View details modal
+- Dark mode support
 
 ### Layout
 
@@ -214,9 +215,10 @@ auth.login(username, password)
 auth.getMe()
 
 // Detection
-detection.detectImage(imageFile)
-detection.detectVideo(videoFile)
-detection.detectCamera(base64Image)
+detection.getModels()                           // Get available models
+detection.detectImage(imageFile, modelKey)      // Detect with model
+detection.detectVideo(videoFile, modelKey)      // Detect with model
+detection.detectCamera(base64Image, modelKey)   // Detect with model
 
 // History
 history.getAll()
