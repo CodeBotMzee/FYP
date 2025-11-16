@@ -83,10 +83,10 @@ const ImageUpload = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Image Detection</h1>
-        <p className="text-gray-600">Upload an image to analyze for deepfake manipulation</p>
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Image Detection</h1>
+        <p className="text-gray-600 dark:text-gray-400">Upload an image to analyze for deepfake manipulation using AI</p>
       </div>
 
       {/* Upload Area */}
@@ -94,16 +94,21 @@ const ImageUpload = () => {
         <div
           onDrop={handleDrop}
           onDragOver={handleDragOver}
-          className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:border-primary transition cursor-pointer bg-gray-50"
+          className="group relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-16 text-center hover:border-primary-500 dark:hover:border-primary-400 transition-all duration-300 cursor-pointer bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 shadow-sm hover:shadow-md"
           onClick={() => fileInputRef.current?.click()}
         >
-          <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <p className="text-lg font-semibold text-gray-700 mb-2">
-            Drop your image here or click to browse
-          </p>
-          <p className="text-sm text-gray-500">
-            Supports: JPG, PNG, JPEG (Max 10MB)
-          </p>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-transparent dark:from-primary-900/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+          <div className="relative">
+            <div className="bg-gradient-to-br from-primary-500 to-primary-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <Upload className="w-10 h-10 text-white" />
+            </div>
+            <p className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              Drop your image here or click to browse
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Supports: JPG, PNG, JPEG • Max 10MB
+            </p>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -113,33 +118,33 @@ const ImageUpload = () => {
           />
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
           {/* Preview */}
-          <div className="relative">
+          <div className="relative group">
             <img
               src={preview}
               alt="Preview"
-              className="w-full max-h-96 object-contain rounded-lg"
+              className="w-full max-h-[500px] object-contain rounded-xl bg-gray-100 dark:bg-gray-900"
             />
             <button
               onClick={handleReset}
-              className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition"
+              className="absolute top-4 right-4 p-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 shadow-lg opacity-0 group-hover:opacity-100"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* File Info */}
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <ImageIcon className="w-5 h-5 text-gray-600" />
-                <div>
-                  <p className="font-medium text-gray-900">{selectedFile?.name}</p>
-                  <p className="text-sm text-gray-500">
-                    {(selectedFile?.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                </div>
+          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-primary-500 to-primary-600 p-3 rounded-lg shadow-md">
+                <ImageIcon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-gray-900 dark:text-white">{selectedFile?.name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {(selectedFile?.size / 1024 / 1024).toFixed(2)} MB
+                </p>
               </div>
             </div>
           </div>
@@ -149,12 +154,12 @@ const ImageUpload = () => {
             <button
               onClick={handleAnalyze}
               disabled={loading}
-              className="w-full mt-4 bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full mt-6 bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white py-4 rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <>
                   <Loader className="w-5 h-5 mr-2 animate-spin" />
-                  Analyzing...
+                  Analyzing with AI...
                 </>
               ) : (
                 'Analyze Image'
@@ -166,7 +171,7 @@ const ImageUpload = () => {
           {result && (
             <button
               onClick={handleReset}
-              className="w-full mt-4 bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 transition"
+              className="w-full mt-6 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-4 rounded-xl font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200"
             >
               Upload Another Image
             </button>
@@ -176,8 +181,8 @@ const ImageUpload = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl animate-slide-up">
+          <p className="text-sm text-red-700 dark:text-red-400 font-medium">{error}</p>
         </div>
       )}
 

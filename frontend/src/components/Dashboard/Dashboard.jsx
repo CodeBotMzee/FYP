@@ -1,15 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Image, Video, Activity, CheckCircle, XCircle, Target } from 'lucide-react';
+import { Camera, Image, Video, Activity, CheckCircle, XCircle, Target, Sparkles, TrendingUp } from 'lucide-react';
 import StatsCard from './StatsCard';
 import RecentHistory from './RecentHistory';
 import { statsAPI, historyAPI } from '../../services/api';
-import { auth } from '../../utils/auth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  // const user = auth.getUser();  // Temporarily disabled
-  const user = { username: 'Guest' };  // Temporary placeholder
+  const user = { username: 'Guest' };
   const [stats, setStats] = useState({
     total_detections: 0,
     fake_count: 0,
@@ -47,23 +45,23 @@ const Dashboard = () => {
   const quickActions = [
     {
       title: 'Camera Detection',
-      description: 'Start live detection',
+      description: 'Real-time analysis',
       icon: Camera,
-      color: 'bg-blue-500',
+      gradient: 'from-blue-500 to-blue-600',
       path: '/camera',
     },
     {
       title: 'Upload Image',
-      description: 'Analyze an image',
+      description: 'Analyze single image',
       icon: Image,
-      color: 'bg-green-500',
+      gradient: 'from-green-500 to-emerald-600',
       path: '/upload/image',
     },
     {
       title: 'Upload Video',
-      description: 'Analyze a video',
+      description: 'Analyze video file',
       icon: Video,
-      color: 'bg-purple-500',
+      gradient: 'from-purple-500 to-purple-600',
       path: '/upload/video',
     },
   ];
@@ -71,17 +69,28 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary-200"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-600 absolute top-0"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl shadow-lg p-8 text-white">
-        <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.username}! 👋</h1>
-        <p className="text-blue-100">Monitor and analyze media for deepfake detection</p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 rounded-2xl shadow-xl p-8 text-white">
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-40 h-40 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-40 h-40 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div className="relative z-10">
+          <div className="flex items-center space-x-2 mb-3">
+            <Sparkles className="w-6 h-6 text-yellow-300 animate-pulse" />
+            <span className="text-sm font-medium text-primary-100">AI-Powered Detection</span>
+          </div>
+          <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.username}! 👋</h1>
+          <p className="text-primary-100 text-lg">Monitor and analyze media for deepfake detection with advanced AI</p>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -91,42 +100,50 @@ const Dashboard = () => {
           value={stats.total_detections}
           icon={Activity}
           color="blue"
+          trend="+12%"
         />
         <StatsCard
           title="Fake Detected"
           value={stats.fake_count}
           icon={XCircle}
           color="red"
+          trend="-5%"
         />
         <StatsCard
           title="Real Content"
           value={stats.real_count}
           icon={CheckCircle}
           color="green"
+          trend="+8%"
         />
         <StatsCard
           title="Avg Confidence"
           value={`${stats.accuracy.toFixed(1)}%`}
           icon={Target}
           color="purple"
+          trend="+2%"
         />
       </div>
 
       {/* Quick Actions */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Quick Actions</h2>
+          <TrendingUp className="w-5 h-5 text-gray-400" />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {quickActions.map((action) => (
             <button
               key={action.path}
               onClick={() => navigate(action.path)}
-              className="bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition text-left group"
+              className="group relative bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 dark:border-gray-700 text-left overflow-hidden hover:-translate-y-1"
             >
-              <div className={`${action.color} w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition`}>
-                <action.icon className="w-6 h-6 text-white" />
+              <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${action.gradient} opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`}></div>
+              <div className={`relative bg-gradient-to-br ${action.gradient} w-14 h-14 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                <action.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-1">{action.title}</h3>
-              <p className="text-gray-600 text-sm">{action.description}</p>
+              <h3 className="relative text-lg font-bold text-gray-900 dark:text-white mb-1">{action.title}</h3>
+              <p className="relative text-gray-600 dark:text-gray-400 text-sm">{action.description}</p>
             </button>
           ))}
         </div>

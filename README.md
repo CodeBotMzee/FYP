@@ -1,66 +1,29 @@
-# Deepfake Detection System - FYP
+# 🛡️ Deepfake Detection System
 
-A full-stack web application for detecting deepfake images and videos using machine learning.
+AI-powered web application for detecting deepfake images and videos using machine learning.
 
-## 🎯 Project Overview
+## ✨ Features
 
-This system allows users to:
-- Upload images and videos for deepfake detection
-- Use real-time camera detection
-- View detection history and statistics
-- Manage their account with JWT authentication
+- 📸 **Image Detection** - Upload and analyze images for deepfake manipulation
+- 🎥 **Video Detection** - Analyze videos frame-by-frame
+- 📷 **Camera Detection** - Real-time webcam analysis
+- 📊 **Dashboard** - View statistics and detection history
+- 🌓 **Dark Mode** - Modern, professional UI with dark mode support
 
-## 🛠 Technology Stack
+## 🛠 Tech Stack
 
-### Backend
-- **Flask** - Python web framework
-- **SQLAlchemy** - Database ORM
-- **SQLite** - Database
-- **JWT** - Authentication
-- **PyTorch + Transformers** - ML model (HuggingFace)
-- **OpenCV** - Video processing
-
-### Frontend
-- **React 18** - UI framework
-- **Vite** - Build tool
-- **React Router** - Navigation
-- **Axios** - HTTP client
-- **Tailwind CSS** - Styling
-- **react-webcam** - Camera access
-
-### ML Model
-- **Model:** dima806/deepfake_vs_real_image_detection
-- **Framework:** HuggingFace Transformers
-- **Type:** Binary classification (Real vs Fake)
+**Backend:** Flask, PyTorch, HuggingFace Transformers, SQLAlchemy, SQLite  
+**Frontend:** React 18, Vite, Tailwind CSS, React Router  
+**ML Model:** dima806/deepfake_vs_real_image_detection
 
 ## 📁 Project Structure
 
 ```
 deepfake-detection/
-├── backend/                 # Flask API
-│   ├── app.py              # Main application
-│   ├── models.py           # Database models
-│   ├── auth.py             # Authentication routes
-│   ├── detection.py        # Detection routes
-│   ├── ml_model.py         # ML model handler
-│   ├── download_model.py   # Model download script
-│   ├── requirements.txt    # Python dependencies
-│   └── README.md           # Backend documentation
-│
-├── frontend/               # React application
-│   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── services/      # API services
-│   │   ├── utils/         # Helper functions
-│   │   └── App.jsx        # Main app component
-│   ├── package.json       # Node dependencies
-│   └── README.md          # Frontend documentation
-│
-├── README.md              # This file
-├── install_backend.bat    # Backend installer
-├── install_frontend.bat   # Frontend installer
-├── run_backend.bat        # Start backend
-└── run_frontend.bat       # Start frontend
+├── backend/           # Flask API + ML model
+├── frontend/          # React application
+├── docker-compose.yml # Docker setup
+└── *.bat             # Windows helper scripts
 ```
 
 ## 🚀 Quick Start
@@ -113,191 +76,34 @@ npm run dev
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:5000
 
-## 📖 Documentation
+## 🎯 How It Works
 
-- **Setup Guide:** See `SETUP.md` - Complete setup instructions
-- **Backend Documentation:** See `backend/README.md`
-- **Frontend Documentation:** See `frontend/README.md`
-- **Docker Guide:** See `DOCKER_GUIDE.md`
-
-## 🎓 FYP Key Features
-
-1. **User Authentication**
-   - Registration and login with JWT tokens
-   - Secure password hashing
-   - Protected routes
-
-2. **Image Detection**
-   - Upload images (JPG, PNG)
-   - ML-based deepfake detection
-   - Confidence score display
-
-3. **Video Detection**
-   - Upload videos (MP4, AVI)
-   - Frame-by-frame analysis
-   - Aggregated results
-
-4. **Camera Detection**
-   - Real-time webcam capture
-   - Live detection results
-   - Session tracking
-
-5. **History & Statistics**
-   - Complete detection history
-   - User statistics dashboard
-   - Filterable results
-
-6. **Modern UI/UX**
-   - Responsive design
-   - Dark mode support
-   - Smooth animations
-
-## 🔑 Key Technical Concepts
-
-### Authentication Flow
-1. User registers → Password hashed → Stored in database
-2. User logs in → Credentials verified → JWT token issued
-3. Token sent with each request → Verified by backend
-4. Token expires after 24 hours
-
-### Detection Flow
-1. User uploads file → Saved to server
-2. ML model processes file → Returns prediction
-3. Result saved to database → Sent to frontend
-4. Frontend displays result with confidence score
-
-### ML Model
-- Uses pre-trained HuggingFace model
-- Processes images through Vision Transformer
-- Returns binary classification (Real/Fake)
-- GPU acceleration if available
-
-## 📊 Database Schema
-
-### Users
-- id, username, email, password_hash, created_at
-
-### Images
-- id, user_id, filename, file_path, is_fake, confidence_score, processed_at
-
-### Videos
-- id, user_id, filename, file_path, is_fake, confidence_score, processed_at
-
-### Camera Detections
-- id, user_id, is_fake, confidence_score, detection_date
-
-### Detection History
-- id, user_id, detection_type, is_fake, confidence_score, detection_time
-
-## 🎯 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - Register user
-- `POST /api/auth/login` - Login user
-- `GET /api/auth/me` - Get current user
-
-### Detection
-- `POST /api/detect/image` - Detect image
-- `POST /api/detect/video` - Detect video
-- `POST /api/detect/camera` - Detect camera frame
-
-### History
-- `GET /api/history` - Get detection history
-- `GET /api/stats` - Get user statistics
+1. **Upload** - Select an image, video, or use your camera
+2. **Analyze** - AI model processes the content using deep learning
+3. **Results** - Get instant feedback with confidence scores
+4. **History** - Track all your detections in the dashboard
 
 ## 🔧 Configuration
 
-### Environment Variables
-
-**Root .env (for Docker)**
-```env
-SECRET_KEY=your-super-secret-key-change-this
-JWT_SECRET_KEY=your-jwt-secret-key-change-this
-DATABASE_URI=sqlite:///deepfake_detection.db
-BACKEND_PORT=5000
-FRONTEND_PORT=5173
+Create `.env` files from the examples:
+```bash
+cp .env.example .env
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
 ```
 
-**Backend .env**
-```env
-FLASK_ENV=development
-SECRET_KEY=your-secret-key
-JWT_SECRET_KEY=your-jwt-secret
-DATABASE_URI=sqlite:///deepfake_detection.db
-HOST=0.0.0.0
-PORT=5000
-FRONTEND_URL=http://localhost:5173
-```
+Update the secret keys in `.env` files before running.
 
-**Frontend .env**
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+## 📝 Development
 
-## 🐛 Troubleshooting
-
-### Backend Issues
-- **Port 5000 in use:** Kill process or change port
-- **Model download fails:** Check internet, run `download_model.py`
-- **Out of memory:** Use CPU instead of GPU
-
-### Frontend Issues
-- **Port 5173 in use:** Vite auto-assigns next port
-- **CORS errors:** Ensure backend is running
-- **Camera not working:** Check browser permissions
-
-## 📝 Notes for FYP Defense
-
-### What to Explain
-1. **Architecture:** Full-stack with REST API
-2. **Authentication:** JWT-based security
-3. **ML Model:** HuggingFace transformer model
-4. **Database:** SQLAlchemy ORM with SQLite
-5. **Frontend:** React with modern hooks
-6. **Deployment:** Can be deployed to cloud platforms
-
-### Key Points
-- Real ML model integration (not mock)
-- Secure authentication with password hashing
-- RESTful API design
-- Responsive UI with dark mode
-- Complete CRUD operations
-- Error handling throughout
-
-### Demo Flow
-1. Show registration and login
-2. Upload sample image → Show detection
-3. Upload sample video → Show processing
-4. Try camera detection
-5. Show history and statistics
-6. Explain technical architecture
-
-## 👨‍💻 Development
-
-### Run in Development Mode
 ```bash
 # Backend (with auto-reload)
-cd backend
-python app.py
+cd backend && python app.py
 
 # Frontend (with hot reload)
-cd frontend
-npm run dev
-```
-
-### Build for Production
-```bash
-# Frontend
-cd frontend
-npm run build
+cd frontend && npm run dev
 ```
 
 ## 📄 License
 
-Educational project for Final Year Project (FYP).
-
----
-
-**For detailed technical documentation, see:**
-- Backend: `backend/README.md`
-- Frontend: `frontend/README.md`
+Educational project for Final Year Project (FYP)

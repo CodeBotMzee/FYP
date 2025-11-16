@@ -1,37 +1,41 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Camera, Upload, History, Image, Video } from 'lucide-react';
+import { LayoutDashboard, Camera, Image, Video, History } from 'lucide-react';
 
-/**
- * Sidebar Component
- * Side navigation menu with links to all pages
- */
 const Sidebar = () => {
   const navItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/camera', icon: Camera, label: 'Camera Detection' },
-    { path: '/upload/image', icon: Image, label: 'Upload Image' },
-    { path: '/upload/video', icon: Video, label: 'Upload Video' },
-    { path: '/history', icon: History, label: 'History' }
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', color: 'blue' },
+    { path: '/camera', icon: Camera, label: 'Camera', color: 'purple' },
+    { path: '/upload/image', icon: Image, label: 'Image Upload', color: 'green' },
+    { path: '/upload/video', icon: Video, label: 'Video Upload', color: 'orange' },
+    { path: '/history', icon: History, label: 'History', color: 'pink' }
   ];
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 shadow-md border-r border-gray-200 dark:border-gray-700 min-h-screen">
-      <nav className="p-4 space-y-2">
+    <aside className="w-64 bg-white dark:bg-gray-800 shadow-sm border-r border-gray-200 dark:border-gray-700 min-h-screen sticky top-16">
+      <nav className="p-4 space-y-1.5">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+              `group flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 isActive
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md shadow-primary-500/30'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:translate-x-1'
               }`
             }
           >
-            <item.icon size={20} />
-            <span>{item.label}</span>
+            {({ isActive }) => (
+              <>
+                <item.icon 
+                  className={`w-5 h-5 transition-transform duration-200 ${
+                    isActive ? '' : 'group-hover:scale-110'
+                  }`}
+                />
+                <span className="font-medium">{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>

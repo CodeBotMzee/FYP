@@ -3,10 +3,6 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 
-/**
- * MainLayout Component
- * Wrapper layout with navbar and sidebar for protected pages
- */
 const MainLayout = () => {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
@@ -27,12 +23,14 @@ const MainLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-6">
-          <Outlet />
+        <main className="flex-1 p-8 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
