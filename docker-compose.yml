@@ -10,8 +10,9 @@ services:
     volumes:
       - ./backend:/app
       - backend-uploads:/app/uploads
-      - backend-db:/app
+      - backend-db:/app/instance
       - huggingface-cache:/root/.cache/huggingface
+      - backend-venv:/app/.venv
     environment:
       - FLASK_ENV=development
       - FLASK_DEBUG=False
@@ -62,4 +63,6 @@ volumes:
   backend-db:
     driver: local
   huggingface-cache:
+    driver: local
+  backend-venv:
     driver: local
