@@ -4,10 +4,11 @@ import { Camera, Image, Video, Activity, CheckCircle, XCircle, Target, Sparkles,
 import StatsCard from './StatsCard';
 import RecentHistory from './RecentHistory';
 import { statsAPI, historyAPI } from '../../services/api';
+import { auth } from '../../utils/auth';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const user = { username: 'Guest' };
+  const [user, setUser] = useState(null);
   const [stats, setStats] = useState({
     total_detections: 0,
     fake_count: 0,
@@ -18,6 +19,10 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Get user from localStorage
+    const currentUser = auth.getUser();
+    setUser(currentUser);
+    
     // Small delay to ensure token is available after navigation
     const timer = setTimeout(() => {
       fetchData();
@@ -97,7 +102,7 @@ const Dashboard = () => {
             <Sparkles className="w-6 h-6 text-yellow-300 animate-pulse" />
             <span className="text-sm font-medium text-primary-100">AI-Powered Detection</span>
           </div>
-          <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.username}! 👋</h1>
+          <h1 className="text-4xl font-bold mb-2">Welcome back, {user?.username || 'User'}! 👋</h1>
           <p className="text-primary-100 text-lg">Monitor and analyze media for deepfake detection with advanced AI</p>
         </div>
       </div>
