@@ -29,28 +29,40 @@ const Login = () => {
     try {
       const response = await authAPI.login(formData.username, formData.password);
       console.log('Login response:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response keys:', Object.keys(response));
-      console.log('Access token:', response.access_token);
-      console.log('Access token type:', typeof response.access_token);
-      console.log('Access token length:', response.access_token?.length);
       
-      if (response.success) {
+      if (response.success && response.access_token) {
         // Store token and user data
         auth.setToken(response.access_token);
         auth.setUser(response.user);
         
         // Verify token was stored
         const storedToken = auth.getToken();
-        console.log('Token stored, length:', storedToken?.length);
-        console.log('First 50 chars:', storedToken?.substring(0, 50));
+        if (!storedToken) {
+          setError('Failed to store authentication token');
+          return;
+        }
         
-        // Redirect to dashboard
+        // Verify token is accessible before navigation
+        console.log('[Login] Token stored, verifying...', {
+          tokenLength: storedToken.length,
+          tokenPreview: storedToken.substring(0, 20) + '...',
+          isAuthenticated: auth.isAuthenticated()
+        });
+        
+        // Navigate immediately - token should be in localStorage
         navigate('/dashboard');
+      } else {
+        setError(response.message || 'Login failed. Invalid response from server.');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      const errorMessage = err.response?.data?.message || err.message || 'Login failed. Please try again.';
+      setError(errorMessage);
+      
+      // If it's a 401, clear any stale tokens
+      if (err.response?.status === 401) {
+        auth.logout();
+      }
     } finally {
       setLoading(false);
     }
@@ -61,7 +73,7 @@ const Login = () => {
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-600 rounded-full mb-4">
             <LogIn className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
@@ -89,7 +101,7 @@ const Login = () => {
               value={formData.username}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-gray-900 bg-white placeholder:text-gray-400"
               placeholder="Enter your username"
             />
           </div>
@@ -105,7 +117,7 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition text-gray-900 bg-white placeholder:text-gray-400"
               placeholder="Enter your password"
             />
           </div>
@@ -113,7 +125,7 @@ const Login = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {loading ? (
               <>
@@ -129,7 +141,7 @@ const Login = () => {
         {/* Sign Up Link */}
         <p className="mt-6 text-center text-gray-600">
           Don't have an account?{' '}
-          <Link to="/signup" className="text-primary font-semibold hover:underline">
+          <Link to="/signup" className="text-primary-600 font-semibold hover:underline">
             Sign up
           </Link>
         </p>

@@ -45,9 +45,21 @@ export const getCurrentUser = () => {
 
 /**
  * Check if user is authenticated
+ * Validates that token exists and is not empty
  */
 export const isAuthenticated = () => {
-  return !!getToken();
+  const token = getToken();
+  if (!token || token.trim() === '') {
+    return false;
+  }
+  
+  // Basic token format validation (JWT tokens have 3 parts separated by dots)
+  const parts = token.split('.');
+  if (parts.length !== 3) {
+    return false;
+  }
+  
+  return true;
 };
 
 /**

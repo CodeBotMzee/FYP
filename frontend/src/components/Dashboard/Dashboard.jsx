@@ -18,7 +18,12 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
+    // Small delay to ensure token is available after navigation
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 200);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const fetchData = async () => {
@@ -37,6 +42,10 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
+      // If authentication error, the interceptor will handle redirect
+      if (error.response?.status === 401) {
+        console.error('Authentication failed - token may be invalid or expired');
+      }
     } finally {
       setLoading(false);
     }

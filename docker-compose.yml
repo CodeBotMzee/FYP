@@ -14,7 +14,7 @@ services:
       - huggingface-cache:/root/.cache/huggingface
     environment:
       - FLASK_ENV=development
-      - FLASK_DEBUG=True
+      - FLASK_DEBUG=False
       - SECRET_KEY=fadf226c2ba61a2af190443d1fadaa15
       - JWT_SECRET_KEY=8df6b14c5eb4afdf7dd0508840e6ef45
       - DATABASE_URI=sqlite:///deepfake_detection.db

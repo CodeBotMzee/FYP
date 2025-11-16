@@ -14,13 +14,20 @@ const api = axios.create({
 });
 
 // Request interceptor - Add JWT token to headers
-// TEMPORARILY DISABLED - No authentication required
 api.interceptors.request.use(
   (config) => {
-    // const token = auth.getToken();
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Don't add token to auth endpoints (login, register)
+    const isAuthEndpoint = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+    
+    if (!isAuthEndpoint) {
+      const token = auth.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        console.log('[API] Adding token to request:', config.url, 'Token length:', token.length);
+      } else {
+        console.warn('[API] No token available for request:', config.url);
+      }
+    }
     return config;
   },
   (error) => {
@@ -33,9 +40,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      auth.logout();
-      window.location.href = '/login';
+      // Token expired or invalid - only redirect if not already on login page
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/login' && currentPath !== '/signup') {
+        auth.logout();
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

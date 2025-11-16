@@ -37,16 +37,22 @@ def generate_unique_filename(original_filename):
 # It uses the HuggingFace model: dima806/deepfake_vs_real_image_detection
 
 @detection_bp.route('/image', methods=['POST'])
-# @jwt_required()  # Temporarily disabled for testing
+@jwt_required()
 def detect_image():
     """
     Upload and detect deepfake in image.
     Expects: multipart/form-data with 'image' field
+    Requires: JWT token in Authorization header
     Returns: {success, is_fake, confidence, image_id}
     """
     try:
-        # user_id = get_jwt_identity()  # Temporarily disabled
-        user_id = 1  # Hardcoded for testing
+        user_id = int(get_jwt_identity())
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
         print(f"[DETECTION] Image upload request from user ID: {user_id}")
         
         # Check if file is present
@@ -155,16 +161,22 @@ def detect_image():
         }), 500
 
 @detection_bp.route('/video', methods=['POST'])
-# @jwt_required()  # Temporarily disabled for testing
+@jwt_required()
 def detect_video():
     """
     Upload and detect deepfake in video.
     Expects: multipart/form-data with 'video' field
+    Requires: JWT token in Authorization header
     Returns: {success, is_fake, confidence, video_id}
     """
     try:
-        # user_id = get_jwt_identity()  # Temporarily disabled
-        user_id = 1  # Hardcoded for testing
+        user_id = int(get_jwt_identity())
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
         print(f"[DETECTION] Video upload request from user ID: {user_id}")
         
         # Check if file is present
@@ -275,16 +287,22 @@ def detect_video():
         }), 500
 
 @detection_bp.route('/camera', methods=['POST'])
-# @jwt_required()  # Temporarily disabled for testing
+@jwt_required()
 def detect_camera():
     """
     Detect deepfake from camera frame.
     Expects: JSON with base64 encoded image
+    Requires: JWT token in Authorization header
     Returns: {success, is_fake, confidence}
     """
     try:
-        # user_id = get_jwt_identity()  # Temporarily disabled
-        user_id = 1  # Hardcoded for testing
+        user_id = int(get_jwt_identity())
+        if not user_id:
+            return jsonify({
+                'success': False,
+                'message': 'Authentication required'
+            }), 401
+        
         print(f"[DETECTION] Camera detection request from user ID: {user_id}")
         
         data = request.get_json()
